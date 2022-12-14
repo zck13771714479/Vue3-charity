@@ -17,7 +17,7 @@
         "rank": 3,
         "id": 3,
         "name": "Doctors Without Borders",
-        "kind":"医疗支持",
+        "kind":"医疗救助",
         "rate": 91
     },
     {
@@ -32,13 +32,6 @@
         "id": 5,
         "name": "World Wildlife Fund",
         "kind":"自然保护",
-        "rate": 85
-    },
-    {
-        "rank": 6,
-        "id": 6,
-        "name": "American Red Cross",
-        "kind":"综合",
         "rate": 85
     }
 

@@ -1,22 +1,34 @@
 <script setup lang="ts">
 import { reactive, toRefs } from "@vue/runtime-core";
 import { useHomeStore } from "@/store/home";
-import { storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
+import Charts from "./Charts.vue";
 
 const store = useHomeStore();
+const router = useRouter();
 const result = reactive({
   imgList: [],
   rankList: [],
 });
 let { imgList, rankList } = toRefs(result);
 //获取轮播图数据
-store.getCarousel().then(() => {
-  imgList.value = store.imgList;
-});
+store
+  .getCarousel()
+  .then(() => {
+    imgList.value = store.imgList;
+  })
+  .catch((error: Error) => {
+    console.log(error.message);
+  });
 //获取排名数据
-store.getRank().then(() => {
-  rankList.value = store.rankList;
-});
+store
+  .getRank()
+  .then(() => {
+    rankList.value = store.rankList;
+  })
+  .catch((error: Error) => {
+    console.log(error.message);
+  });
 
 //排名表格形式
 const rankColumns = [
@@ -47,6 +59,16 @@ const rankColumns = [
     align: "center",
   },
 ];
+
+//跳转到指定路由
+function getChaityName(text: string) {
+  router.push({
+    name: "Details",
+    params: {
+      keyword: text,
+    },
+  });
+}
 </script>
 
 <template>
@@ -63,8 +85,11 @@ const rankColumns = [
       >
         <template #bodyCell="{ column, text }">
           <template v-if="column.dataIndex === 'name'">
-            <a>{{ text }}</a>
+            <a @click="getChaityName(text)">{{ text }}</a>
           </template>
+        </template>
+        <template #title>
+          <div style="text-align: center">慈善机构声誉评分排名</div>
         </template>
       </a-table>
     </div>
@@ -87,6 +112,8 @@ const rankColumns = [
       </a-carousel>
     </div>
   </div>
+  <Charts />
+  <About />
 </template>
 
 
@@ -98,7 +125,14 @@ const rankColumns = [
   width: 100%;
   height: 430px;
   margin-top: 10px;
-
+  /deep/ .ant-table-tbody {
+    > tr:hover:not(.ant-table-expanded-row) > td,
+    .ant-table-row-hover,
+    .ant-table-row-hover > td {
+      background: #fff886 !important;
+      //设置table鼠标移入时的背景色
+    }
+  }
   .carousel-container {
     width: 500px;
     flex: 1;
