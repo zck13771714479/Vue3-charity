@@ -10,6 +10,7 @@ function enterHome(): void {
 </script>
 
 <template>
+  <TopHeader />
   <div class="welcome-container">
     <div id="welcome">
       <div class="charity-title">

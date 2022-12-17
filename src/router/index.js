@@ -18,6 +18,11 @@ const routes = [
         name: 'Details',
         path: '/details/:keyword',
         component: () => import('../views/Details/Details.vue'),
+    },
+    {
+        name:'SearchResult',
+        path:'/searchResult',
+        component:()=> import('../views/SearchResult/SearchResult.vue')
     }
 ]
 

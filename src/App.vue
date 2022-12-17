@@ -1,34 +1,21 @@
 <script setup lang="ts">
-import "animate.css";
-
 </script>
 
 <template>
   <div id="app-container">
-    <router-view v-slot="{ Component }">
-      <transition
-        appear
-        name="animate__animated animate__bounce"
-        enter-active-class="animate__bounceInUp"
-        leave-active-class="animate__backOutUp"
-      >
-        <component :is="Component" />
-      </transition>
-    </router-view>
-    
+    <router-view> </router-view>
   </div>
-
 </template>
 
 <style lang="less">
-body{
+body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  a{
+  a {
     text-decoration: none;
   }
-  ul{
+  ul {
     list-style: none;
   }
 }

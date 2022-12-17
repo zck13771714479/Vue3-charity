@@ -1,11 +1,99 @@
 <script setup lang="ts">
 import { reactive, ref } from "@vue/reactivity";
-const keyword = ref("");
+import { useHomeStore } from "@/store/home";
+import { useRoute, useRouter } from "vue-router";
+import { getCurrentInstance, inject, watch } from "@vue/runtime-core";
+const store = useHomeStore();
+const router = useRouter();
+const route = useRoute();
+const keyword = ref<string>(""); //输入搜索的关键词
+const inputFlag = ref<boolean>(false); //是否展示输入列表推荐结果
+const charityList = reactive<string[]>([]); //慈善机构名字列表
+const searchList = reactive<string[]>([]); //搜索结果匹配列表
+const { bus } = getCurrentInstance()!.appContext.config.globalProperties;
+
+// watch(route, (to) => {
+//   //路由跳转至结果页面完成总线传参
+//   if (to.name == "SearchResult") {
+//     bus.emit("matchSearch", searchList);
+//     console.log("触发事件");
+//   }
+// });
+type rank = {
+  rank: number;
+  id: number;
+  name: string;
+  kind: string;
+  rate: number;
+};
+//通过慈善机构排名数据获取机构名字列表
+store.getRank().then(() => {
+  store.rankList.forEach((item: rank) => {
+    charityList.push(item.name);
+  });
+});
+
+//自定义简单模糊匹配规则
+function matchSearch(ipt: string, pattern: string): boolean {
+  ipt = ipt.replaceAll("[-_s]", "").toLowerCase();
+  pattern = pattern.replaceAll("[-_s]", "").toLowerCase();
+  return pattern.indexOf(ipt) !== -1;
+}
+//输入关键词后的回调
+function inputKeyword() {
+  searchList.splice(0, searchList.length); //每次输入都清空搜索数组,重新赋值
+  let ipt = keyword.value.trim();
+  if (ipt == "") {
+    inputFlag.value = false;
+  }
+  inputFlag.value = charityList.some((charityName: string) => {
+    return ipt !== "" && matchSearch(ipt, charityName);
+  });
+  let count = 0; //最多只显示3个提示
+  charityList.forEach((charityName: string) => {
+    if (ipt !== "" && matchSearch(ipt, charityName) && count < 3) {
+      count++;
+      searchList.push(charityName);
+    }
+  });
+}
+//点击推荐选择输入
+function clickChoose(name: string) {
+  keyword.value = name;
+  inputFlag.value = false;
+  let tmp = searchList.filter((item: string) => {
+    return item == name;
+  });
+  searchList.splice(0, searchList.length);
+  searchList.push(...tmp);
+}
+//点击搜索按钮的回调
+function searchCharity() {
+  if (searchList.length == 1) {
+    keyword.value = "";
+    router.push({
+      name: "Details",
+      params: {
+        keyword: searchList[0],
+      },
+    });
+    searchList.splice(0, searchList.length);
+    
+  } else {
+    router.push({
+      name: "SearchResult",
+      query: {
+        keyword: keyword.value,
+      },
+    });
+  }
+  keyword.value = "";
+}
 </script>
 
 <template>
   <div id="header-container">
-    <ul>
+    <ul class="header_ul">
       <li>
         <router-link to="/home">首页</router-link>
       </li>
@@ -15,10 +103,28 @@ const keyword = ref("");
       <li id="charity-search">
         <a-input-search
           class="search"
-          v-model="keyword"
+          v-model:value="keyword"
           placeholder="请输入您想搜索的慈善机构"
           enter-button
+          @input="inputKeyword"
+          @search="searchCharity"
+          @focus="inputFlag = true"
+          @blur="inputFlag = false"
+
         />
+        <div class="search-tip" v-show="inputFlag">
+          <ul class="search_list">
+            <!-- mousedown会在blur前触发,用click直接blur不会触发 -->
+            <li
+              class="search_list_item"
+              @mousedown="clickChoose(name)"
+              v-for="(name, index) in searchList"
+              :key="index"
+            >
+              {{ name }}
+            </li>
+          </ul>
+        </div>
       </li>
       <li id="login-register">
         <a href="javascript:;">登录</a>
@@ -31,11 +137,15 @@ const keyword = ref("");
 
 <style lang="less" scoped>
 @container-height: 40px;
+* {
+  padding: 0;
+  margin: 0;
+}
 #header-container {
   width: 100%;
   height: @container-height;
   background-color: #eee;
-  ul {
+  .header_ul {
     width: 1200px;
     margin: 0 auto;
     display: flex;
@@ -46,6 +156,26 @@ const keyword = ref("");
       height: 100%;
       line-height: @container-height;
       text-align: center;
+      .search-tip {
+        position: relative;
+        top: -8px;
+        width: 100%;
+
+        background-color: #eee;
+        z-index: 999;
+        .search_list {
+          .search_list_item {
+            height: 40px;
+            line-height: 40px;
+            text-indent: 5px;
+            text-align: left;
+            cursor: pointer;
+            &:hover {
+              background-color: #abdcff;
+            }
+          }
+        }
+      }
       a {
         display: block;
         width: 100%;
@@ -68,6 +198,5 @@ const keyword = ref("");
       padding-top: 5px;
     }
   }
-
 }
 </style>
