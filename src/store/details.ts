@@ -4,7 +4,8 @@ import API from "@/request/index";
 export const useDetailStore = defineStore('details', {
     state: () => {
         return {
-            details:{},
+            details: {},
+            searchList: JSON.parse(sessionStorage.getItem('storeSearchList') as string)
         }
     },
     actions: {

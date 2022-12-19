@@ -22,7 +22,7 @@ export function reqCharts() {
     })
 }
 // 获取慈善机构详情
-export function reqDetails(name: string[]|string) {
+export function reqDetails(name: string) {
     return requests({
         url: 'details',
         method: 'POST',

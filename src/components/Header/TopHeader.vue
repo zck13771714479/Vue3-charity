@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { reactive, ref } from "@vue/reactivity";
 import { useHomeStore } from "@/store/home";
-import { useRoute, useRouter } from "vue-router";
+import { stringifyQuery, useRoute, useRouter } from "vue-router";
 import { getCurrentInstance, inject, watch } from "@vue/runtime-core";
+import { message } from "ant-design-vue";
+import { useDetailStore } from "../../store/details";
 const store = useHomeStore();
 const router = useRouter();
 const route = useRoute();
@@ -11,14 +13,7 @@ const inputFlag = ref<boolean>(false); //是否展示输入列表推荐结果
 const charityList = reactive<string[]>([]); //慈善机构名字列表
 const searchList = reactive<string[]>([]); //搜索结果匹配列表
 const { bus } = getCurrentInstance()!.appContext.config.globalProperties;
-
-// watch(route, (to) => {
-//   //路由跳转至结果页面完成总线传参
-//   if (to.name == "SearchResult") {
-//     bus.emit("matchSearch", searchList);
-//     console.log("触发事件");
-//   }
-// });
+const detailStore = useDetailStore();
 type rank = {
   rank: number;
   id: number;
@@ -49,7 +44,7 @@ function inputKeyword() {
   inputFlag.value = charityList.some((charityName: string) => {
     return ipt !== "" && matchSearch(ipt, charityName);
   });
-  let count = 0; //最多只显示3个提示
+  let count = 0; //最多只显示3个提示，不要过多的联想
   charityList.forEach((charityName: string) => {
     if (ipt !== "" && matchSearch(ipt, charityName) && count < 3) {
       count++;
@@ -57,7 +52,7 @@ function inputKeyword() {
     }
   });
 }
-//点击推荐选择输入
+//点击推荐选择输入,联想功能
 function clickChoose(name: string) {
   keyword.value = name;
   inputFlag.value = false;
@@ -69,6 +64,11 @@ function clickChoose(name: string) {
 }
 //点击搜索按钮的回调
 function searchCharity() {
+  sessionStorage.removeItem("storeSearchList"); //先清空仓库中的列表
+  if (keyword.value.trim() == "") {
+    message.warning("请输入内容");
+    return;
+  }
   if (searchList.length == 1) {
     keyword.value = "";
     router.push({
@@ -78,11 +78,13 @@ function searchCharity() {
       },
     });
     searchList.splice(0, searchList.length);
-    
   } else {
+    let sessionSearchList = JSON.stringify(searchList);
+    sessionStorage.setItem("storeSearchList", sessionSearchList);
+    detailStore.searchList = JSON.parse(sessionStorage.getItem('storeSearchList') as string)
     router.push({
-      name: "SearchResult",
-      query: {
+      name: "Search404",
+      params: {
         keyword: keyword.value,
       },
     });
@@ -110,7 +112,6 @@ function searchCharity() {
           @search="searchCharity"
           @focus="inputFlag = true"
           @blur="inputFlag = false"
-
         />
         <div class="search-tip" v-show="inputFlag">
           <ul class="search_list">

@@ -20,10 +20,11 @@ const routes = [
         component: () => import('../views/Details/Details.vue'),
     },
     {
-        name:'SearchResult',
-        path:'/searchResult',
-        component:()=> import('../views/SearchResult/SearchResult.vue')
+        name: 'Search404',
+        path: '/search404/:keyword',
+        component: () => import('../views/Search/Search404.vue')
     }
+
 ]
 
 export default createRouter({
