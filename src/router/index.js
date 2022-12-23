@@ -23,6 +23,16 @@ const routes = [
         name: 'Search404',
         path: '/search404/:keyword',
         component: () => import('../views/Search/Search404.vue')
+    },
+    {
+        name: 'Login',
+        path: '/login',
+        component: () => import('../views/User/Login.vue')
+    },
+    {
+        name: 'Register',
+        path: '/register',
+        component: () => import('../views/User/Register.vue')
     }
 
 ]

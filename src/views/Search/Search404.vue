@@ -34,11 +34,7 @@ async function getPossibleDetail() {
     isHaveResult.value = false;
     return;
   }
-
-  if (possible.length <= 0) {
-    return;
-  }
-  //遍历多次发请求，性能有点低，但是联想列表最多只给3个，影响不大，后期可以从接口方面优化
+  //遍历多次发请求，性能有点低，但是联想列表最多只有3个元素，影响不大，后期可以从接口方面优化
   //多次请求会导致刷新页面乱序,但总结果不变
   possible.forEach(async (item: string) => {
     let result = await API.mock.reqDetails(item);
@@ -128,6 +124,15 @@ getPossibleDetail();
         .possible-name {
           font-size: 18px;
           font-weight: 600;
+        }
+        .possbile-intr{
+          //多行文字省略显示
+          margin-top: 10px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
         }
       }
     }

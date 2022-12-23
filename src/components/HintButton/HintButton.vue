@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineEmits, defineProps, toRefs } from "vue";
+import { toRefs } from "vue";
 const props = defineProps(["title", "text"]);
 const { title,text} = toRefs(props);
 </script>
