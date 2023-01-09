@@ -2,7 +2,8 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { CSSOptions } from 'vite';
 import { Options as LessOptions } from 'less';
-import {resolve} from 'path'
+import { resolve } from 'path'
+import commonjs from 'vite-plugin-commonjs'
 
 function getDir(dir: string): string {
   return resolve(__dirname, './', dir)
@@ -11,11 +12,12 @@ function getDir(dir: string): string {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), commonjs()],
   resolve: {
     alias: {
       '@': getDir('src')
-    }
+    },
+    extensions:['.js','.ts','.vue','.json']
   },
   css: {
     preprocessorOptions: {
