@@ -17,10 +17,13 @@ const password = joi
     .string()
     .pattern(/^[\S]{6,12}$/)
     .required()
-
+const phone = joi.string().min(11).max(11).required()
+const nickname = joi.string().min(1).required()
 export const validate = {
     body: {
         username,
-        password
+        password,
+        phone,
+        nickname
     }
 }

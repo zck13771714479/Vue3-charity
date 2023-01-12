@@ -1,10 +1,59 @@
 <script setup lang="ts">
 import { reactive } from "@vue/reactivity";
-
-const loginInfo = reactive({
-  username: "admin",
-  password: "123",
+import API from "@/request/index";
+import type { Rule } from "ant-design-vue/es/form";
+import { message } from "ant-design-vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
+export type loginInput = {
+  username: string;
+  password: string;
+};
+const loginInfo = reactive<loginInput>({
+  username: "",
+  password: "",
 });
+const rules: Record<string, Rule[]> = {
+  username: [
+    {
+      required: true,
+      message: "用户名不能为空",
+      transform: (value: string): string => {
+        return value.trim();
+      },
+      trigger: "change",
+    },
+    { max: 20, message: "用户名最多有20个字符", trigger: "change" },
+  ],
+  password: [
+    {
+      required: true,
+      message: "密码不能为空",
+      trigger: "change",
+    },
+    {
+      max: 12,
+      message: "密码需要是6-12个字符",
+      trigger: "change",
+    },
+    {
+      min: 6,
+      message: "密码需要是6-12个字符",
+      trigger: "change",
+    },
+  ],
+};
+async function loginSubmit() {
+  let result = await API.user.reqLogin(loginInfo);
+  if (result.data.code == 200) {
+    message.success("登录成功");
+    let token: string = result.data.token;
+    sessionStorage.setItem("TOKEN", token);
+    router.push("/home");
+  } else {
+    message.error("登录失败," + result.data.message);
+  }
+}
 </script>
 <template>
   <div id="login-container">
@@ -16,12 +65,10 @@ const loginInfo = reactive({
         autocomplete="off"
         :label-col="{ span: 6 }"
         :wrapper-col="{ span: 16 }"
+        :rules="rules"
+        @finish="loginSubmit"
       >
-        <a-form-item
-          label="用户名"
-          name="username"
-          :rules="[{ required: true, message: '请输入用户名' }]"
-        >
+        <a-form-item label="用户名" name="username">
           <a-input
             v-model:value="loginInfo.username"
             placeholder="请输入用户名"
@@ -32,11 +79,7 @@ const loginInfo = reactive({
           </a-input>
         </a-form-item>
 
-        <a-form-item
-          label="密码"
-          name="password"
-          :rules="[{ required: true, message: '请输入密码' }]"
-        >
+        <a-form-item label="密码" name="password">
           <a-input-password
             v-model:value="loginInfo.password"
             placeholder="请输入密码"
@@ -50,6 +93,16 @@ const loginInfo = reactive({
           <router-link to="/register">没有账号？点击注册</router-link>
         </a-form-item>
         <a-form-item name="loginButton" :wrapper-col="{ offset: 6, span: 16 }">
+          <a-button
+            size="large"
+            style="margin-right: 20px"
+            @click="router.push('/home')"
+          >
+            <template #icon>
+              <arrow-left-outlined />
+            </template>
+            返回首页</a-button
+          >
           <a-button type="primary" html-type="submit" size="large">
             <template #icon><login-outlined /> </template>
             登录</a-button

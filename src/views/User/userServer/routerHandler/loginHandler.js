@@ -6,7 +6,7 @@ import { db } from '../database/index.js';
 import { validate } from '../utils/validate.js';
 import { sercetKey, expiresIn } from '../config.js';
 export const loginHandler = (req, res) => {
-    let loginInfo = req.body;
+    let loginInfo = JSON.parse(Object.keys(req.body)[0]);
     if (loginInfo.username.trim() == '' || loginInfo.password.trim() == '') {
         //判空
         res.cc(200, '账号密码为空')

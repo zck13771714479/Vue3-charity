@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 import { db } from '../database/index.js';
 import { validate } from '../utils/validate.js';
 export const registerHandler = (req, res) => {
-    let registerInfo = req.body;
+    let registerInfo = JSON.parse(Object.keys(req.body)[0])
     if (registerInfo.username.trim() == '' || registerInfo.password.trim() == '') {
         //判空
         res.cc(200, '账号密码为空')
@@ -24,7 +24,14 @@ export const registerHandler = (req, res) => {
         registerInfo.password = bcrypt.hashSync(registerInfo.password, 10);
         //插入用户信息
         const insertUserSql = 'insert into ev_user set ?';
-        db.query(insertUserSql, { username: registerInfo.username, password: registerInfo.password }, (err, results) => {
+        const insertInfo = {
+            username: registerInfo.username,
+            phone: registerInfo.phone,
+            password: registerInfo.password,
+            nickname: registerInfo.nickname,
+            permission: 0
+        }
+        db.query(insertUserSql, insertInfo, (err, results) => {
             if (err) {
                 res.cc(202, err);
                 return
@@ -33,6 +40,7 @@ export const registerHandler = (req, res) => {
                 res.cc(201, '注册失败');
                 return;
             }
+
             res.cc(200, '注册成功');
         })
     });

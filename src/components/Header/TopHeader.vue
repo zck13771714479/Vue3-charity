@@ -2,9 +2,16 @@
 import { reactive, ref } from "@vue/reactivity";
 import { useHomeStore } from "@/store/home";
 import { stringifyQuery, useRoute, useRouter } from "vue-router";
-import { getCurrentInstance, inject, watch } from "@vue/runtime-core";
+import {
+  getCurrentInstance,
+  inject,
+  onMounted,
+  watch,
+} from "@vue/runtime-core";
 import { message } from "ant-design-vue";
 import { useDetailStore } from "../../store/details";
+import API from "@/request/index";
+
 const store = useHomeStore();
 const router = useRouter();
 const route = useRoute();
@@ -12,6 +19,7 @@ const keyword = ref<string>(""); //输入搜索的关键词
 const inputFlag = ref<boolean>(false); //是否展示输入列表推荐结果
 const charityList = reactive<string[]>([]); //慈善机构名字列表
 const searchList = reactive<string[]>([]); //搜索结果匹配列表
+
 const { bus } = getCurrentInstance()!.appContext.config.globalProperties;
 const detailStore = useDetailStore();
 type rank = {
@@ -81,7 +89,9 @@ function searchCharity() {
   } else {
     let sessionSearchList = JSON.stringify(searchList);
     sessionStorage.setItem("storeSearchList", sessionSearchList);
-    detailStore.searchList = JSON.parse(sessionStorage.getItem('storeSearchList') as string)
+    detailStore.searchList = JSON.parse(
+      sessionStorage.getItem("storeSearchList") as string
+    );
     router.push({
       name: "Search404",
       params: {
@@ -90,6 +100,22 @@ function searchCharity() {
     });
   }
   keyword.value = "";
+}
+
+//登录获取用户信息
+const isLogin = ref<boolean>(false); //是否已经登录
+const nickname = ref<string>("");
+onMounted(async () => {
+  let result = await API.user.getUserInfo();
+  if (result.data.code == 200) {
+    isLogin.value = true;
+    nickname.value = result.data.data.nickname;
+  }
+});
+//退出登录
+function logout(){
+  isLogin.value = false;
+  sessionStorage.removeItem('TOKEN');
 }
 </script>
 
@@ -127,9 +153,13 @@ function searchCharity() {
           </ul>
         </div>
       </li>
-      <li id="login-register">
-        <a href="javascript:;">登录</a>
-        <a href="javascript:;">注册</a>
+      <li class="login-register" v-if="!isLogin">
+        <router-link to="/login">登录</router-link>
+        <router-link to="/register">注册</router-link>
+      </li>
+      <li class="userInfo" v-else>
+        <span>用户：{{ nickname }}</span>
+        <a @click="logout" class="logout">退出登录</a>
       </li>
     </ul>
   </div>
@@ -187,13 +217,20 @@ function searchCharity() {
         }
       }
     }
-    #login-register {
+    .login-register {
       display: flex;
       flex: 1;
       a {
         display: block;
         width: 50%;
       }
+    }
+    .logout{
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 60px;
+      height: @container-height;
     }
     #charity-search {
       padding-top: 5px;
