@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { Component, createApp } from 'vue'
 import Antd from 'ant-design-vue';
 import App from './App.vue'
 import 'ant-design-vue/dist/antd.css'
@@ -10,7 +10,8 @@ import mitt from 'mitt'
 import TopHeader from './components/Header/TopHeader.vue'
 import About from './components/Footer/About.vue'
 import HintButton from './components/HintButton/HintButton.vue'
-import './mock/mockServer.js'
+import './mock/mockServer.ts'
+
 
 
 const app = createApp(App)
@@ -19,7 +20,7 @@ app.component('TopHeader',TopHeader)
 app.component('About',About)
 app.component('HintButton',HintButton)
 app.config.globalProperties.bus = mitt()
-const icons: any = Icons;
+const icons:Component = Icons;
 for (const i in icons) {
     // 全局注册一下组件
     app.component(i, icons[i])
@@ -27,4 +28,5 @@ for (const i in icons) {
 app.use(pinia)
 app.use(router)
 app.use(Antd)
+
 app.mount('#app')

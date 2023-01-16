@@ -24,4 +24,11 @@ export function getUserInfo() {
         method: 'GET',
     })
 }
-
+//删除捐款数据
+export function deleteDonateInfo(index: string, id: number) {
+    return requests({
+        url: 'deleteDonate',
+        method: 'POST',
+        data: JSON.stringify({ index, id })
+    })
+}

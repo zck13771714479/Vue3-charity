@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useDetailStore } from "@/store/details";
 import { reactive, ref, nextTick, watch, onMounted } from "@vue/runtime-core";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+const router = useRouter();
 //处理点击锚点后正常的锚点链接跳转
 type link = {
   href: string;
@@ -70,6 +71,16 @@ function getData(keyword: string) {
   });
 }
 getData(route.params.keyword as string);
+//跳转至捐款流向路由
+function toDonate(name: string, id: number): void {
+  router.push({
+    name: "Donate",
+    params: {
+      id,
+      name,
+    },
+  });
+}
 </script>
 
 <template>
@@ -85,7 +96,18 @@ getData(route.params.keyword as string);
       />
     </a-anchor>
     <div class="content">
-      <div class="title">{{ details.name }}</div>
+      <div class="title">
+        {{ details.name }}
+        <a-button
+          size="large"
+          type="primary"
+          style="border-radius: 10px"
+          @click="toDonate(route.params.keyword, details.id)"
+        >
+          <template #icon><arrow-right-outlined /> </template>
+          查看捐款流向
+        </a-button>
+      </div>
       <div id="introduction">
         <div class="logo">
           <img :src="details.logo" alt="logo" />

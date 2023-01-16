@@ -107,7 +107,7 @@ const isLogin = ref<boolean>(false); //是否已经登录
 const nickname = ref<string>("");
 onMounted(async () => {
   let result = await API.user.getUserInfo();
-  if (result.data.code == 200) {
+  if (result && result.data.code == 200) {
     isLogin.value = true;
     nickname.value = result.data.data.nickname;
   }

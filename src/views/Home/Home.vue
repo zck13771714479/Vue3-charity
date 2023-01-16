@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { reactive, toRefs } from "@vue/runtime-core";
+import { onMounted, reactive, ref, toRefs } from "@vue/runtime-core";
 import { useHomeStore } from "@/store/home";
 import { useRouter } from "vue-router";
 import Charts from "./Charts.vue";
+
 
 const store = useHomeStore();
 const router = useRouter();
@@ -69,6 +70,7 @@ function getChaityName(text: string) {
     },
   });
 }
+
 </script>
 
 <template>

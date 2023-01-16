@@ -5,6 +5,7 @@ const cors = require('cors');
 const joi = require('joi')
 import { userRouter } from './router/user.js';
 import { userInfoRouter } from './router/userInfo.js';
+import { operationRoute } from './router/operations.js';
 const app = express();
 // 解析 token 的中间件
 const expressJWT = require('express-jwt')
@@ -28,6 +29,7 @@ app.use(expressJWT({ secret: sercetKey }).unless({ path: [/^\/user\/login/,/^\/u
 
 app.use('/user', userRouter);
 app.use('/user',userInfoRouter);
+app.use('/user',operationRoute)
 
 app.use((err, req, res, next) => {
     // 数据验证失败

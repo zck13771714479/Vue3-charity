@@ -3,7 +3,10 @@ import carousel from './carousel.json'
 import rank from './rank.json'
 import charts from './charts.json'
 import details from './details.json'
-
+import donate from '@/views/User/userServer/file/donate.json'
+import type { donateInfoType } from "@/store/donate.ts";
+import path from 'path-browserify'
+import fs from 'fs'
 // 模拟轮播图列表
 Mock.mock('/mock/carousel',
     {
@@ -29,7 +32,7 @@ Mock.mock('/mock/charts', {
 
 })
 //模拟详情页数据
-Mock.mock('/mock/details', 'post', (options) => {
+Mock.mock('/mock/details', 'post', (options: any) => {
     let keyword = options.body;
     // console.log(keyword);
     let data;
@@ -48,6 +51,26 @@ Mock.mock('/mock/details', 'post', (options) => {
             return keyword.includes(item.name);
         })
         console.log(data);
+    }
+    return {
+        code: 200,
+        msg: '成功',
+        data
+    }
+})
+//获取捐款流向数据
+function pagenation(current: number, pageSize: number, data: donateInfoType) {
+    let startIndex = (current - 1) * pageSize;
+    let endIndex = startIndex + pageSize >= data.length ? data.length - 1 : startIndex + pageSize;
+    return data.slice(startIndex, endIndex);
+}
+Mock.mock('/mock/donate', 'post', (options: any) => {
+    let { id, current, pageSize } = JSON.parse(options.body);
+    let donateInfo = donate[id * 1 - 1];
+    let total = donateInfo.length;
+    let data = {
+        total,
+        donate: pagenation(current, pageSize, donateInfo)
     }
     return {
         code: 200,
