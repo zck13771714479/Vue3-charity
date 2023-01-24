@@ -5,13 +5,14 @@ import { useRoute } from "vue-router";
 import { useDonateStore } from "@/store/donate.ts";
 import type { donateInfoType } from "@/store/donate.ts";
 import API from "@/request/index";
-import { Item } from "ant-design-vue/lib/menu";
+import updateDonate from "./updateDonate.vue";
 import { message } from "ant-design-vue";
-import { number } from "echarts";
-import { nextTick, onMounted, watch } from "@vue/runtime-core";
 const route = useRoute();
 const id = route.params.id;
 const name = route.params.name;
+const isUpdated = ref<boolean>(false);
+export type updateOperationType = "edit" | "add";
+const editOrAdd = ref<updateOperationType>("add");
 const store = useDonateStore();
 const pagination = reactive({
   defaultPageSize: 5,
@@ -23,14 +24,11 @@ const pagination = reactive({
     getData(id, current, pageSize);
   },
 });
-onMounted(() => {
-  message.success("挂载完成");
-});
-type edit = {
+type row = {
   key: string;
-  isEdit: boolean;
 };
-type tableDataType = donateInfoType & edit;
+//表格数据类型
+export type tableDataType = donateInfoType & row;
 let donateData = ref<{
   total: number;
   donate: donateInfoType[] | tableDataType[];
@@ -38,6 +36,7 @@ let donateData = ref<{
   total: 0,
   donate: [],
 });
+//获取数据
 function getData(id: string | string[], current: number, pageSize: number) {
   store
     .getDonateInfo({
@@ -58,8 +57,14 @@ function getData(id: string | string[], current: number, pageSize: number) {
       );
     });
 }
-
+//表格格式
 const columns = [
+  {
+    title: "序号",
+    key: "key",
+    align: "center",
+    width: 80,
+  },
   {
     title: "交易日期",
     key: "transcationDate",
@@ -81,13 +86,44 @@ const columns = [
     key: "operations",
   },
 ];
-function deleteItem(
-  index: string,
-  id: number,
-  options: { id: string | string[]; current: number; pageSize: number }
-) {
-  API.user.deleteDonateInfo(index, id);
-  getData(options.id, options.current, options.pageSize);
+//删除数据
+async function deleteItem(id: number, current: number, pageSize: number) {
+  let result = await API.user.deleteDonateInfo(id);
+  if (result.data.code == 200) {
+    message.success("删除成功");
+    if (current == 1) {
+      getData(route.params.id, current, pageSize);
+      return;
+    }
+    if (Math.ceil(pagination.total / pageSize) == current) {
+      //处理最后一页删除完的情况
+      let restSize = pagination.total - 1;
+      if (restSize <= (current - 1) * pageSize) {
+        pagination.current = current - 1;
+        getData(route.params.id, pagination.current, pageSize);
+        return;
+      }
+    }
+    getData(route.params.id, current, pageSize);
+  } else {
+    message.error("删除失败");
+  }
+}
+//添加数据
+function addDonateEntry() {
+  isUpdated.value = true;
+  editOrAdd.value = "add";
+}
+//修改数据
+let editRecord = ref<tableDataType>({});
+function editDonateEntry(record: tableDataType) {
+  isUpdated.value = true;
+  editOrAdd.value = "edit";
+  editRecord.value = record;
+}
+//关闭对话框
+function destoryModal() {
+  isUpdated.value = false;
 }
 getData(id, pagination.current, pagination.pageSize);
 </script>
@@ -102,10 +138,26 @@ getData(id, pagination.current, pagination.pageSize);
   >
     <template #title>
       <h3 style="text-align: center">{{ name }} 的公开捐款流向</h3>
+      <a-button type="primary" @click="addDonateEntry">
+        <template #icon>
+          <plus-circle-outlined />
+        </template>
+        添加捐款项</a-button
+      >
+      <updateDonate
+        v-if="isUpdated"
+        @destoryModal="destoryModal"
+        @finishUpdate="getData(id, pagination.current, pagination.pageSize)"
+        :mode="editOrAdd"
+        :editRecord="editRecord"
+      />
     </template>
     <template #bodyCell="{ column, record }">
+      <template v-if="column.key == 'key'">
+        <div>{{ record.key }}</div>
+      </template>
       <template v-if="column.key == 'transcationDate'">
-        <span>{{ record.transcationDate }}</span>
+        <span>{{ record.transcation_date }}</span>
       </template>
       <template v-if="column.key == 'payee'">
         <span>{{ record.payee }}</span>
@@ -117,7 +169,7 @@ getData(id, pagination.current, pagination.pageSize);
         <span>{{ record.tips }}</span>
       </template>
       <template v-if="column.key == 'operations'">
-        <a-button style="margin-right: 20px">
+        <a-button style="margin-right: 20px" @click="editDonateEntry(record)">
           <template #icon> <edit-outlined /></template>
           修改
         </a-button>
@@ -125,11 +177,7 @@ getData(id, pagination.current, pagination.pageSize);
           type="primary"
           danger
           @click="
-            deleteItem(id, record.id, {
-              id,
-              current: pagination.current,
-              pageSize: pagination.pageSize,
-            })
+            deleteItem(record.id, pagination.current, pagination.pageSize)
           "
         >
           <template #icon> <delete-outlined /></template>
@@ -152,5 +200,13 @@ getData(id, pagination.current, pagination.pageSize);
 
 
 
-<style>
+<style scoped lang="less">
+/deep/ .ant-table-tbody {
+  > tr:hover:not(.ant-table-expanded-row) > td,
+  .ant-table-row-hover,
+  .ant-table-row-hover > td {
+    background: #c2ffd8 !important;
+    //设置table鼠标移入时的背景色
+  }
+}
 </style>

@@ -9,12 +9,6 @@ const userRouter = express.Router();
 // 1. 导入验证表单数据的中间件
 const expressJoi = require('@escook/express-joi')
 
-userRouter.use((req,res,next)=>{
-    console.log('type '+typeof req.body);
-    console.log(req.body);
-    console.log(Object.keys(req.body));
-    next()
-})
 userRouter.post('/register', registerHandler)
 userRouter.post('/login', loginHandler)
 

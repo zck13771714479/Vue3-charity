@@ -3,7 +3,8 @@ import API from "@/request/index";
 import dayjs, { Dayjs } from "dayjs";
 export type donateInfoType = {
     id: number
-    transcationDate: string | Dayjs,
+    charityIndex: number
+    transcation_date: string | Dayjs,
     payee: string,
     amount: number,
     tips: string
@@ -21,11 +22,11 @@ export const useDonateStore: StoreDefinition = defineStore('donate', {
     actions: {
         //获取捐款流向数据
         async getDonateInfo(options: { id: string, current: number, pageSize: number }): Promise<void | Error | string> {
-            let result = await API.mock.reqDonateInfo(options);
+            let result = await API.user.reqDonateInfo(options);
             if (result.data.code == 200) {
                 this.donateInfo = result.data.data;
                 this.donateInfo.donate.forEach((item: donateInfoType) => {
-                    item.transcationDate = dayjs(item.transcationDate as string).format(dateFormat);
+                    item.transcation_date = dayjs(item.transcation_date as string).format(dateFormat);
                 })
                 return 'ok'
             } else {

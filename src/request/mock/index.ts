@@ -29,11 +29,4 @@ export function reqDetails(name: string) {
         data: name,
     })
 }
-//获取捐款流向信息
-export function reqDonateInfo(options: { id: string, current: number, pageSize: number }) {
-    return requests({
-        url: 'donate',
-        method: 'POST',
-        data: options
-    })
-}
+

@@ -1,1 +1,25 @@
-[[{"id":1,"transcationDate":"2022-12-22","payee":"123","amount":1500000,"tips":""},{"id":2,"transcationDate":"2022-12-22","payee":"666","amount":1500000,"tips":""},{"id":3,"transcationDate":"2022-12-22","payee":"444","amount":1500000,"tips":""},{"id":5,"transcationDate":"2022-12-22","payee":"777","amount":1500000,"tips":""},{"id":5,"transcationDate":"2022-12-22","payee":"aaa","amount":1500000,"tips":"圣诞救助"},{"id":12,"transcationDate":"2022-12-22","payee":"add","amount":1500000,"tips":"圣诞救助"},{"id":14,"transcationDate":"2022-12-22","payee":"add","amount":1500000,"tips":"圣诞救助"}]]
+[
+    [
+        {
+            "id": 1,
+            "transcationDate": "2022-12-22",
+            "payee": "123",
+            "amount": 1500000,
+            "tips": ""
+        },
+        {
+            "id": 2,
+            "transcationDate": "2022-12-22",
+            "payee": "666",
+            "amount": 1500000,
+            "tips": ""
+        },
+        {
+            "id": 14,
+            "transcationDate": "2022-12-22",
+            "payee": "add",
+            "amount": 1500000,
+            "tips": "圣诞救助"
+        }
+    ]
+]

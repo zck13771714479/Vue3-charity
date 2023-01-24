@@ -58,23 +58,19 @@ Mock.mock('/mock/details', 'post', (options: any) => {
         data
     }
 })
-//获取捐款流向数据
-function pagenation(current: number, pageSize: number, data: donateInfoType) {
-    let startIndex = (current - 1) * pageSize;
-    let endIndex = startIndex + pageSize >= data.length ? data.length - 1 : startIndex + pageSize;
-    return data.slice(startIndex, endIndex);
-}
-Mock.mock('/mock/donate', 'post', (options: any) => {
-    let { id, current, pageSize } = JSON.parse(options.body);
-    let donateInfo = donate[id * 1 - 1];
-    let total = donateInfo.length;
-    let data = {
-        total,
-        donate: pagenation(current, pageSize, donateInfo)
-    }
-    return {
-        code: 200,
-        msg: '成功',
-        data
-    }
-})
+// //获取捐款流向数据
+
+// Mock.mock('/mock/donate', 'post', (options: any) => {
+//     let { id, current, pageSize } = JSON.parse(options.body);
+//     let donateInfo = donate[id * 1 - 1];
+//     let total = donateInfo.length;
+//     let data = {
+//         total,
+//         donate: pagenation(current, pageSize, donateInfo)
+//     }
+//     return {
+//         code: 200,
+//         msg: '成功',
+//         data
+//     }
+// })
