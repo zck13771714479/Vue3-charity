@@ -74,8 +74,6 @@ function getChaityName(text: string) {
 </script>
 
 <template>
-  <!-- 头部 -->
-  <TopHeader />
   <!-- 慈善机构排名 -->
   <div class="first-level">
     <div id="ranks">

@@ -5,7 +5,7 @@ const express = require('express');
 
 //获取用户信息
 export const getUserInfo = (req, res) => {
-    const getInfoSql = 'select username, phone,nickname from ev_user where id = ?';
+    const getInfoSql = 'select username, phone,nickname,permission from ev_user where id = ?';
     //req.user是express-jwt解析token后挂载上去的
     db.query(getInfoSql, req.user.id, (err, results) => {
         if (err) return res.cc(201, err);

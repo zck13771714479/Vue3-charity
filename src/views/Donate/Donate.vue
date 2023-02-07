@@ -3,6 +3,8 @@ import { reactive, ref } from "@vue/reactivity";
 import dayjs, { Dayjs } from "dayjs";
 import { useRoute } from "vue-router";
 import { useDonateStore } from "@/store/donate.ts";
+import { useUserStore } from "@/store/user.ts";
+import { storeToRefs } from "pinia";
 import type { donateInfoType } from "@/store/donate.ts";
 import API from "@/request/index";
 import updateDonate from "./updateDonate.vue";
@@ -14,6 +16,8 @@ const isUpdated = ref<boolean>(false);
 export type updateOperationType = "edit" | "add";
 const editOrAdd = ref<updateOperationType>("add");
 const store = useDonateStore();
+const userInfoStore = useUserStore();
+const { permission } = storeToRefs(userInfoStore);
 const pagination = reactive({
   defaultPageSize: 5,
   current: 1,
@@ -38,6 +42,9 @@ let donateData = ref<{
 });
 //获取数据
 function getData(id: string | string[], current: number, pageSize: number) {
+  if(!permissionValid()){
+    columns.pop();
+  }
   store
     .getDonateInfo({
       id,
@@ -86,6 +93,13 @@ const columns = [
     key: "operations",
   },
 ];
+//权限判断
+function permissionValid(): boolean {
+  if (permission.value < 0 || permission.value == route.params.id) {
+    return true;
+  }
+  return false;
+}
 //删除数据
 async function deleteItem(id: number, current: number, pageSize: number) {
   let result = await API.user.deleteDonateInfo(id);
@@ -129,7 +143,6 @@ getData(id, pagination.current, pagination.pageSize);
 </script>
 
 <template>
-  <top-header />
   <a-table
     :columns="columns"
     :data-source="donateData.donate"
@@ -138,7 +151,7 @@ getData(id, pagination.current, pagination.pageSize);
   >
     <template #title>
       <h3 style="text-align: center">{{ name }} 的公开捐款流向</h3>
-      <a-button type="primary" @click="addDonateEntry">
+      <a-button type="primary" @click="addDonateEntry" v-if="permissionValid()">
         <template #icon>
           <plus-circle-outlined />
         </template>
@@ -168,7 +181,7 @@ getData(id, pagination.current, pagination.pageSize);
       <template v-if="column.key == 'tips'">
         <span>{{ record.tips }}</span>
       </template>
-      <template v-if="column.key == 'operations'">
+      <template v-if="permissionValid() && column.key == 'operations' ">
         <a-button style="margin-right: 20px" @click="editDonateEntry(record)">
           <template #icon> <edit-outlined /></template>
           修改

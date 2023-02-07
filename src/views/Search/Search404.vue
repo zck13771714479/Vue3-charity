@@ -53,7 +53,6 @@ getPossibleDetail();
 </script>
 
 <template>
-  <TopHeader />
   <div class="container">
     <div class="input-keyword" v-if="isHaveResult">
       您搜索的关键词是：“{{ keyword }}”，未能精确匹配结果，可能的结果如下：

@@ -84,7 +84,7 @@ function toDonate(name: string, id: number): void {
 </script>
 
 <template>
-  <TopHeader />
+  
   <div class="container" ref="container">
     <a-anchor class="anchor" @click="anchorClickHandler">
       <a-anchor-link href="#introduction" title="Introduction" />

@@ -3,8 +3,12 @@ import { reactive } from "@vue/reactivity";
 import API from "@/request/index";
 import type { Rule } from "ant-design-vue/es/form";
 import { message } from "ant-design-vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
+import { getCurrentInstance } from "vue";
 const router = useRouter();
+const route = useRoute();
+const { bus } = getCurrentInstance()!.appContext.config.globalProperties;
+
 export type loginInput = {
   username: string;
   password: string;
@@ -49,7 +53,12 @@ async function loginSubmit() {
     message.success("登录成功");
     let token: string = result.data.token;
     sessionStorage.setItem("TOKEN", token);
-    router.push("/home");
+    bus.emit("submitLogin");
+    if (route.query.redirect) {
+      router.push(route.query.redirect as string);
+    } else {
+      router.push("/home");
+    }
   } else {
     message.error("登录失败," + result.data.message);
   }

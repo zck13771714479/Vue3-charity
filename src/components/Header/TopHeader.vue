@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from "@vue/reactivity";
 import { useHomeStore } from "@/store/home";
+import { useUserStore } from "@/store/user";
 import { stringifyQuery, useRoute, useRouter } from "vue-router";
 import {
   getCurrentInstance,
@@ -12,15 +13,19 @@ import { message } from "ant-design-vue";
 import { useDetailStore } from "../../store/details";
 import API from "@/request/index";
 
+const { bus } = getCurrentInstance()!.appContext.config.globalProperties;
 const store = useHomeStore();
+const userStore = useUserStore();
 const router = useRouter();
 const route = useRoute();
+//登录获取用户信息
+const isLogin = ref<boolean>(userStore.isLogin); //是否已经登录
+const nickname = ref<string>(userStore.nickname);
+
 const keyword = ref<string>(""); //输入搜索的关键词
 const inputFlag = ref<boolean>(false); //是否展示输入列表推荐结果
 const charityList = reactive<string[]>([]); //慈善机构名字列表
 const searchList = reactive<string[]>([]); //搜索结果匹配列表
-
-const { bus } = getCurrentInstance()!.appContext.config.globalProperties;
 const detailStore = useDetailStore();
 type rank = {
   rank: number;
@@ -71,51 +76,61 @@ function clickChoose(name: string) {
   searchList.push(...tmp);
 }
 //点击搜索按钮的回调
+const flag = ref<boolean>(true);
 function searchCharity() {
-  sessionStorage.removeItem("storeSearchList"); //先清空仓库中的列表
-  if (keyword.value.trim() == "") {
-    message.warning("请输入内容");
-    return;
-  }
-  if (searchList.length == 1) {
+  if (flag) {
+    flag.value = false;
+    sessionStorage.removeItem("storeSearchList"); //先清空仓库中的列表
+    if (keyword.value.trim() == "") {
+      message.warning("请输入内容");
+      return;
+    }
+    if (searchList.length == 1) {
+      keyword.value = "";
+      router.push({
+        name: "Details",
+        params: {
+          keyword: searchList[0],
+        },
+      });
+      searchList.splice(0, searchList.length);
+    } else {
+      let sessionSearchList = JSON.stringify(searchList);
+      sessionStorage.setItem("storeSearchList", sessionSearchList);
+      detailStore.searchList = JSON.parse(
+        sessionStorage.getItem("storeSearchList") as string
+      );
+      router.push({
+        name: "Search404",
+        params: {
+          keyword: keyword.value,
+        },
+      });
+    }
     keyword.value = "";
-    router.push({
-      name: "Details",
-      params: {
-        keyword: searchList[0],
-      },
-    });
-    searchList.splice(0, searchList.length);
-  } else {
-    let sessionSearchList = JSON.stringify(searchList);
-    sessionStorage.setItem("storeSearchList", sessionSearchList);
-    detailStore.searchList = JSON.parse(
-      sessionStorage.getItem("storeSearchList") as string
-    );
-    router.push({
-      name: "Search404",
-      params: {
-        keyword: keyword.value,
-      },
-    });
+    setTimeout(() => {
+      flag.value = true;
+    }, 1500);
   }
-  keyword.value = "";
+}
+//获取用户信息
+async function getUserInfo() {
+  await userStore.getInfo();
+  isLogin.value = userStore.isLogin;
+  nickname.value = userStore.nickname;
 }
 
-//登录获取用户信息
-const isLogin = ref<boolean>(false); //是否已经登录
-const nickname = ref<string>("");
-onMounted(async () => {
-  let result = await API.user.getUserInfo();
-  if (result && result.data.code == 200) {
-    isLogin.value = true;
-    nickname.value = result.data.data.nickname;
-  }
+getUserInfo();
+//登录后发送请求
+bus.on("submitLogin", () => {
+  getUserInfo();
 });
+
 //退出登录
-function logout(){
-  isLogin.value = false;
-  sessionStorage.removeItem('TOKEN');
+function logout() {
+  userStore.logout();
+  sessionStorage.removeItem("TOKEN");
+  getUserInfo();
 }
 </script>
 
@@ -225,7 +240,7 @@ function logout(){
         width: 50%;
       }
     }
-    .logout{
+    .logout {
       position: absolute;
       top: 0;
       right: 0;
