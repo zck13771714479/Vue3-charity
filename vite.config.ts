@@ -12,10 +12,12 @@ function getDir(dir: string): string {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  root:'./',
+  base:'./',
   plugins: [vue(), commonjs()],
   resolve: {
     alias: {
-      '@': getDir('src')
+      '@': './src'
     },
     extensions:['.js','.ts','.vue','.json']
   },

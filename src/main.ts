@@ -10,7 +10,7 @@ import TopHeader from './components/Header/TopHeader.vue'
 import About from './components/Footer/About.vue'
 import HintButton from './components/HintButton/HintButton.vue'
 import './mock/mockServer.ts'
-
+import {useUserStore} from './store/user'
 
 
 const app = createApp(App)
@@ -27,5 +27,6 @@ for (const i in icons) {
 app.use(pinia)
 app.use(router)
 app.use(Antd)
+
 
 app.mount('#app')
